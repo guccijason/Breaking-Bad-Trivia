@@ -25,9 +25,9 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.net.http.HttpRequest;
 import java.nio.charset.StandardCharsets;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.util.ArrayList;
 
 
 /**
@@ -46,6 +46,7 @@ public class ApiApp extends Application {
         .create();
 
     private static final String BREAKING_API = "https://api.breakingbadquotes.xyz/v1/quotes";
+    private static final String BREAKING_INFO = "https://api.tvmaze.com/shows/169/";
 
     Stage stage;
     Scene scene;
@@ -61,12 +62,16 @@ public class ApiApp extends Application {
     ImageView titlePic;
     Button start;
     HBox thirdLay;
+    ArrayList<String> charNames;
+    ArrayList<String> charImageUrls;
 
     /**
      * Constructs an {@code ApiApp} object. This default (i.e., no argument)
      * constructor is executed in Step 2 of the JavaFX Application Life-Cycle.
      */
     public ApiApp() {
+        charNames = new ArrayList<String>();
+        charImageUrls = new ArrayList<String>();
         start = new Button("Start");
         root = new VBox();
         stage = null;
@@ -127,7 +132,7 @@ public class ApiApp extends Application {
 
         setDefault();
         quotesSetUp();
-
+        tvInfoSetUp();
 
     }
 
@@ -195,5 +200,63 @@ public class ApiApp extends Application {
     private void getQuote(BreakingQuotes[] breakingquotes) {
         this.quote.setText(breakingquotes[0].quote);
     }
+
+    /**
+     * Sets up the Breaking Bad tv show info.
+     */
+    private void tvInfoSetUp() {
+        try {
+            // form URI
+            String uri = BREAKING_INFO + "cast";
+            // build request
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(uri))
+                .build();
+            // send request / receive response in the form of a String
+            HttpResponse<String> response = HTTP_CLIENT
+                .send(request, BodyHandlers.ofString());
+            // ensure the request is okay
+            if (response.statusCode() != 200) {
+                throw new IOException(response.toString());
+            } // if
+            // get request body (the content we requested)
+            String jsonString = response.body();
+            //System.out.println("********** RAW JSON STRING: **********");
+            //System.out.println(jsonString.trim());
+            // parse the JSON-formatted string using GSON
+            TvInfo[] tvinfo = GSON
+                .fromJson(jsonString, TvInfo[].class);
+            // print info about the response
+            addImages(tvinfo);
+        } catch (IOException | InterruptedException e) {
+
+            System.err.println(e);
+            e.printStackTrace();
+        } // try
+    } //tvInfoSetUp
+
+    /**
+     * Sets ups the images of the characters.
+     * @param tvinfo
+     */
+    private void addImages(TvInfo[] tvinfo) {
+        for (int i = 0; i < tvinfo.length; i++) {
+            charNames.add(tvinfo[i].character.name);
+            charImageUrls.add(tvinfo[i].character.image.medium);
+        }
+        for (int i = 0; i < charNames.size(); i++) {
+            System.out.println(charNames.get(i));
+            System.out.println(charImageUrls.get(i));
+        }
+        Image temp1 = new Image(charImageUrls.get(0), 175, 175, false, false);
+        Image temp2 = new Image(charImageUrls.get(1), 175, 175, false, false);
+        Image temp3 = new Image(charImageUrls.get(2), 175, 175, false, false);
+        this.imgv1.setImage(temp1);
+        this.imgv2.setImage(temp2);
+        this.imgv3.setImage(temp3);
+        this.choice1.setText(charNames.get(0));
+        this.choice2.setText(charNames.get(1));
+        this.choice3.setText(charNames.get(2));
+    } // addImages
 
 } // ApiApp
