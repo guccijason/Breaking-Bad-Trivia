@@ -1,5 +1,7 @@
 package cs1302.api;
 
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.layout.Priority;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -64,12 +66,16 @@ public class ApiApp extends Application {
     HBox thirdLay;
     ArrayList<String> charNames;
     ArrayList<String> charImageUrls;
+    Boolean correctAnswer;
+    String quoteName;
 
     /**
      * Constructs an {@code ApiApp} object. This default (i.e., no argument)
      * constructor is executed in Step 2 of the JavaFX Application Life-Cycle.
      */
     public ApiApp() {
+        quoteName = "";
+        correctAnswer = false;
         charNames = new ArrayList<String>();
         charImageUrls = new ArrayList<String>();
         start = new Button("Start");
@@ -102,11 +108,6 @@ public class ApiApp extends Application {
         topLay.getChildren().add(title);
         topLay.setAlignment(Pos.CENTER);
 
-
-        String breakBadURL = "resources/breakingbad-large-logo.png";
-        Image breakBadImg = new Image("file:" + breakBadURL, 500, 125, false, false);
-        titlePic.setImage(breakBadImg);
-
         topLay.setHgrow(title, Priority.ALWAYS);
         secLay.getChildren().addAll(question, start);
         secLay.setAlignment(Pos.CENTER);
@@ -131,9 +132,13 @@ public class ApiApp extends Application {
         choice3.setMaxHeight(Double.MAX_VALUE);
 
         setDefault();
-        quotesSetUp();
-        tvInfoSetUp();
 
+        EventHandler<ActionEvent> startGame = (ActionEvent e) -> {
+            quotesSetUp();
+            tvInfoSetUp();
+            start.setText("Reset");
+        };
+        start.setOnAction(startGame);
     }
 
     /** {@inheritDoc} */
@@ -157,6 +162,9 @@ public class ApiApp extends Application {
      * Helper method to set default images.
      */
     private void setDefault() {
+        String breakBadURL = "resources/breakingbad-large-logo.png";
+        Image breakBadImg = new Image("file:" + breakBadURL, 500, 125, false, false);
+        titlePic.setImage(breakBadImg);
         String defaultURL = "resources/walter-whiteFace.png";
         Image defaultImg = new Image("file:" + defaultURL, 175, 175, false, false);
         imgv1.setImage(defaultImg);
@@ -198,7 +206,9 @@ public class ApiApp extends Application {
      * @param breakingquotes the response object
      */
     private void getQuote(BreakingQuotes[] breakingquotes) {
+        this.quoteName = breakingquotes[0].author;
         this.quote.setText(breakingquotes[0].quote);
+        System.out.println(quoteName);
     }
 
     /**
@@ -240,6 +250,8 @@ public class ApiApp extends Application {
      * @param tvinfo
      */
     private void addImages(TvInfo[] tvinfo) {
+        charNames.clear();
+        charImageUrls.clear();
         for (int i = 0; i < tvinfo.length; i++) {
             charNames.add(tvinfo[i].character.name);
             charImageUrls.add(tvinfo[i].character.image.medium);
@@ -248,15 +260,98 @@ public class ApiApp extends Application {
             System.out.println(charNames.get(i));
             System.out.println(charImageUrls.get(i));
         }
-        Image temp1 = new Image(charImageUrls.get(0), 175, 175, false, false);
-        Image temp2 = new Image(charImageUrls.get(1), 175, 175, false, false);
-        Image temp3 = new Image(charImageUrls.get(2), 175, 175, false, false);
+        int randNum = (int) (Math.random() * charNames.size());
+        int randNum1 = (int) (Math.random() * charNames.size());
+        int randNum2 = (int) (Math.random() * charNames.size());
+
+        checkForDups(randNum, randNum1, randNum2);
+
+        Image temp1 = new Image(charImageUrls.get(randNum), 175, 175, false, false);
+        Image temp2 = new Image(charImageUrls.get(randNum1), 175, 175, false, false);
+        Image temp3 = new Image(charImageUrls.get(randNum2), 175, 175, false, false);
         this.imgv1.setImage(temp1);
         this.imgv2.setImage(temp2);
         this.imgv3.setImage(temp3);
-        this.choice1.setText(charNames.get(0));
-        this.choice2.setText(charNames.get(1));
-        this.choice3.setText(charNames.get(2));
+        this.choice1.setText(charNames.get(randNum));
+        this.choice2.setText(charNames.get(randNum1));
+        this.choice3.setText(charNames.get(randNum2));
+        getNameFromQuote();
     } // addImages
+
+    /**
+     * Matches the quote with the name.
+     */
+    private void getNameFromQuote() {
+        int index = 0;
+        int randNum = (int) (Math.random() * 3) + 1;
+        if (charNames.contains(quoteName)) {
+
+            index = charNames.indexOf(quoteName);
+            setRandom(randNum, index);
+
+
+        } else if (quoteName.equals("Gustavo Fring")) {
+
+            index = charNames.indexOf("Gustavo 'Gus' Fring");
+            setRandom(randNum, index);
+
+        } else if (quoteName.equals("Mike Ehrmantraut")) {
+
+            index = charNames.indexOf("Michael 'Mike' Ehrmantraut");
+            setRandom(randNum, index);
+
+        } else {
+            String defaultURL = "resources/walter-whiteFace.png";
+            Image defaultImg = new Image("file:" + defaultURL, 175, 175, false, false);
+            if (randNum == 1) {
+                this.choice1.setText("None of these");
+                this.imgv1.setImage(defaultImg);
+            }
+            if (randNum == 2) {
+                this.choice2.setText("None of these");
+                this.imgv2.setImage(defaultImg);
+            }
+            if (randNum == 3) {
+                this.choice3.setText("None of these");
+                this.imgv3.setImage(defaultImg);
+            }
+        }
+    } // getNameFromQuote
+
+    /**
+     * Helper method to set buttons.
+     * @param randNum
+     * @param index
+     */
+    private void setRandom(int randNum, int index) {
+        Image temp1 = new Image(charImageUrls.get(index), 175, 175, false, false);
+        if (randNum == 1) {
+            this.choice1.setText(charNames.get(index));
+            this.imgv1.setImage(temp1);
+        }
+        if (randNum == 2) {
+            this.choice2.setText(charNames.get(index));
+            this.imgv2.setImage(temp1);
+        }
+        if (randNum == 3) {
+            this.choice3.setText(charNames.get(index));
+            this.imgv3.setImage(temp1);
+        }
+    } // setRandom
+
+    /**
+     * Helper method to check for duplicate random numbers.
+     * @param randNum1
+     * @param randNum2
+     * @param randNum3
+     */
+    private void checkForDups(int randNum1, int randNum2, int randNum3) {
+        while (randNum1 == randNum2 || randNum1 == randNum3 || randNum2 == randNum3) {
+            randNum1 = (int) (Math.random() * charNames.size());
+            randNum2 = (int) (Math.random() * charNames.size());
+            randNum3 = (int) (Math.random() * charNames.size());
+        }
+    }
+
 
 } // ApiApp
