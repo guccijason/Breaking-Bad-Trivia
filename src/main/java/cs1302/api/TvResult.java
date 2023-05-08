@@ -5,5 +5,7 @@ package cs1302.api;
  */
 public class TvResult {
     String name;
+    String gender;
+    String birthday;
     TvImage image;
 } // TvResult

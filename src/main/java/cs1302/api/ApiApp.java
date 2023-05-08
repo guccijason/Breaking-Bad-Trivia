@@ -66,26 +66,37 @@ public class ApiApp extends Application {
     Button choice1, choice2, choice3;
     ImageView imgv1, imgv2, imgv3;
     ImageView titlePic;
+    ImageView actorPic;
     Button start;
     HBox thirdLay;
     ArrayList<String> charNames;
     ArrayList<String> charImageUrls;
+    ArrayList<String> actorNames;
+    ArrayList<String> actorImageUrls;
+    ArrayList<String> actorGender;
+    ArrayList<String> actorBirthday;
     String[] buttons;
     Boolean correctAnswer;
     String quoteName;
     Label infoBox;
+    VBox rightSide;
 
     /**
      * Constructs an {@code ApiApp} object. This default (i.e., no argument)
      * constructor is executed in Step 2 of the JavaFX Application Life-Cycle.
      */
     public ApiApp() {
+        rightSide = new VBox(50);
         infoBox = new Label("Breaking Bad is a tv show");
         buttons = new String[3];
         quoteName = "";
         correctAnswer = false;
         charNames = new ArrayList<String>();
         charImageUrls = new ArrayList<String>();
+        actorNames = new ArrayList<String>();
+        actorImageUrls = new ArrayList<String>();
+        actorGender = new ArrayList<String>();
+        actorBirthday = new ArrayList<String>();
         start = new Button("Start");
         root = new VBox();
         tree = new HBox();
@@ -104,6 +115,7 @@ public class ApiApp extends Application {
         choice2 = new Button();
         choice3 = new Button();
         titlePic = new ImageView();
+        actorPic = new ImageView();
         question = new Label("Who said this quote?");
         quote = new Label("QUOTE");
         title = new Label("BREAKING BAD TRIVIA");
@@ -114,7 +126,8 @@ public class ApiApp extends Application {
     public void init() {
         tree.setMaxWidth(750);
         infoBox.setWrapText(true);
-        tree.getChildren().addAll(root, infoBox);
+        rightSide.getChildren().addAll(infoBox, actorPic);
+        tree.getChildren().addAll(root, rightSide);
         root.setMaxWidth(500);
         root.getChildren().addAll(topLay, titlePic, secLay, thirdLay, row1, row2, row3);
         topLay.getChildren().add(title);
@@ -197,6 +210,7 @@ public class ApiApp extends Application {
         imgv1.setImage(defaultImg);
         imgv2.setImage(defaultImg);
         imgv3.setImage(defaultImg);
+        actorPic.setImage(defaultImg);
     }
 
     /**
@@ -282,6 +296,10 @@ public class ApiApp extends Application {
         for (int i = 0; i < tvinfo.length; i++) {
             charNames.add(tvinfo[i].character.name);
             charImageUrls.add(tvinfo[i].character.image.medium);
+            actorNames.add(tvinfo[i].person.name);
+            actorImageUrls.add(tvinfo[i].person.image.medium);
+            actorGender.add(tvinfo[i].person.gender);
+            actorBirthday.add(tvinfo[i].person.birthday);
         }
         checkForDups();
         getNameFromQuote();
@@ -430,21 +448,33 @@ public class ApiApp extends Application {
      * @param choice
      */
     private void checkIfCorrect(Button choice) {
+        int index = 0;
         String gus1 = "Gustavo 'Gus' Fring";
         String mike1 = "Michael 'Mike' Ehrmantraut";
         correctAnswer = false;
         if (choice.getText().equals(quoteName)) {
             correctAnswer = true;
+            index = charNames.indexOf(choice.getText());
         } else if (choice.getText().equals(gus1) && (quoteName.equals("Gustavo Fring"))) {
             correctAnswer = true;
+            index = charNames.indexOf(choice.getText());
         } else if (choice.getText().equals(mike1) && (quoteName.equals("Mike Ehrmantraut"))) {
             correctAnswer = true;
+            index = charNames.indexOf(choice.getText());
         }
         if (correctAnswer == true) {
-            infoBox.setText("CORRECT\n This quote was said by " + choice.getText());
+            infoBox.setText("CORRECT\n This quote was said by " + choice.getText()
+                             + " who is played by " + actorNames.get(index)
+                             + "\nGender: " + actorGender.get(index)
+                             + "\nBirthday: " + actorBirthday.get(index));
+            Image actor = new Image(actorImageUrls.get(index), 250, 350, false, false);
+            actorPic.setImage(actor);
         }
         if (correctAnswer == false) {
-            infoBox.setText("INCORRECT\n This quote was said by " + choice.getText());
+            infoBox.setText("INCORRECT\n This quote was not said by " + choice.getText());
+            String defaultURL = "resources/walter-whiteFace.png";
+            Image defaultImg = new Image("file:" + defaultURL, 250, 350, false, false);
+            actorPic.setImage(defaultImg);
         }
     } // checkIfCorrect
 
