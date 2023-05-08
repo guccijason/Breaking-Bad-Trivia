@@ -153,6 +153,18 @@ public class ApiApp extends Application {
         };
         start.setOnAction(startGame);
 
+        EventHandler<ActionEvent> clickButton1 = (ActionEvent e) -> {
+            checkIfCorrect(choice1);
+        };
+        choice1.setOnAction(clickButton1);
+        EventHandler<ActionEvent> clickButton2 = (ActionEvent e) -> {
+            checkIfCorrect(choice2);
+        };
+        choice2.setOnAction(clickButton2);
+        EventHandler<ActionEvent> clickButton3 = (ActionEvent e) -> {
+            checkIfCorrect(choice3);
+        };
+        choice3.setOnAction(clickButton3);
 
     }
 
@@ -418,8 +430,21 @@ public class ApiApp extends Application {
      * @param choice
      */
     private void checkIfCorrect(Button choice) {
+        String gus1 = "Gustavo 'Gus' Fring";
+        String mike1 = "Michael 'Mike' Ehrmantraut";
+        correctAnswer = false;
         if (choice.getText().equals(quoteName)) {
             correctAnswer = true;
+        } else if (choice.getText().equals(gus1) && (quoteName.equals("Gustavo Fring"))) {
+            correctAnswer = true;
+        } else if (choice.getText().equals(mike1) && (quoteName.equals("Mike Ehrmantraut"))) {
+            correctAnswer = true;
+        }
+        if (correctAnswer == true) {
+            infoBox.setText("CORRECT\n This quote was said by " + choice.getText());
+        }
+        if (correctAnswer == false) {
+            infoBox.setText("INCORRECT\n This quote was said by " + choice.getText());
         }
     } // checkIfCorrect
 

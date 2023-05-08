@@ -25,7 +25,7 @@ Markdown is transformed into nice looking HTML.
     the author to look into the TV Maze API, which contains all tv show information
     and I used their Breaking Bad information and used to quote's author to find
     information about the author such as the picture, actor, their birthday, and
-    a picture of the actor.
+    a picture of the actor. https://github.com/guccijason/cs1302-api
 
 
 
